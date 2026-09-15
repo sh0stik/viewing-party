@@ -12,6 +12,10 @@ def create_movie(title, genre, rating):
 # -----------------------------------------
 
 def get_friends_watched_movies(user_data): 
+    """helper function. Find the movies that friends have watched
+    Returns: 
+        lists of movie dictionaries [{},{}]
+    """
     friends_watched = []
     for friend in user_data["friends"]: 
         for movie in friend["watched"]: 
@@ -20,29 +24,38 @@ def get_friends_watched_movies(user_data):
     return friends_watched
     
 def get_unique_watched(user_data):
+    """Find the movies that the user has watched, but none of the friends have watched. 
+    Returns:
+        lists of movie dictionaries [{},{}]
+    """
+    
+    user_watched = user_data["watched"]                     # all the movies the user watched
+    friends_watched = get_friends_watched_movies(user_data) # all the movies that friends watched
 
-    # user_watched and friends_watched are lists of movie dictionaries
-    user_watched = user_data["watched"]     
-    friends_watched = get_friends_watched_movies(user_data)
-
-    unique_list = []                        
+    unique = []                        
+    # filter out the movies that the friends watched
     for movie in user_watched: 
         if movie not in friends_watched:
-            unique_list.append(movie)
+            unique.append(movie)
 
-    return unique_list
+    return unique
 
 def get_friends_unique_watched(user_data):
+    """Find the movies that at least one friend has watched, but the user has not watched. 
+    Returns:
+        lists of movie dictionaries [{},{}]
+    """
 
-    user_watched = user_data["watched"]                     # structure: list of movie dictionaries
-    friends_watched = get_friends_watched_movies(user_data) # structure: list of movie dictionaries
+    user_watched = user_data["watched"]                     # all the movies the user watched
+    friends_watched = get_friends_watched_movies(user_data) # all movies that friends watched
 
-    unwatched_list = []
+    unwatched = []
+    # filter out the movies the user has watched and duplicates
     for movie in friends_watched: 
-        if movie not in user_watched and movie not in unwatched_list: 
-            unwatched_list.append(movie)
+        if movie not in user_watched and movie not in unwatched: 
+            unwatched.append(movie)
 
-    return unwatched_list
+    return unwatched
 
 
 # -----------------------------------------
@@ -50,9 +63,14 @@ def get_friends_unique_watched(user_data):
 # -----------------------------------------
 
 def get_available_recs(user_data): 
+    """Find recommended movies that the user has not watched but at least one 
+    of the friends has watched. Only keep movies hosted on subscribed services
 
-    # get a list of unwatched movies that at least one of the friends watched
-    unwatched_list = get_friends_unique_watched(user_data)
+    Returns:
+        lists of movie dictionaries [{},{}]
+    """
+
+    unwatched_list = get_friends_unique_watched(user_data)  #unwatched movies that at least one of the friends watched
 
     recommended_list = []
     # filter out movies on the platforms the user is not subscribed to
@@ -65,4 +83,43 @@ def get_available_recs(user_data):
 # -----------------------------------------
 # ------------- WAVE 5 --------------------
 # -----------------------------------------
+
+def get_new_rec_by_genre(user_data): 
+    """Find the movies that the user has not watched but at least one of the friends watched
+    Only keep movies of the user's most watched genre
+
+    Returns:
+        None if the friends' watched list is empty
+        lists of movie dictionaries [{},{}]
+    """
+    unwatched_list = get_friends_unique_watched(user_data)  #unwatched movies that at least one of the friends watched
+    genre = get_most_watched_genre(user_data)
+    # genre = "Fantasy" #for testing purposes
+
+    recommended = []
+    # filter out movies of all genres except the favorite genre
+    for movie in unwatched_list: 
+        if movie["genre"] == genre: 
+            recommended.append(movie)
+
+    return recommended
+
+
+def get_rec_from_favorites(user_data): 
+    """Find the movies from user's favorites that none of the friends watched
+    Returns:
+        lists of movie dictionaries [{},{}]
+    """
+    favorites = user_data["favorites"]
+    unique_watched = get_unique_watched(user_data)
+
+    recommended = []
+    # filter out movies that friends watched and duplicates
+    for movie in favorites: 
+        if movie in unique_watched and movie not in recommended: 
+            recommended.append(movie)
+
+    return recommended
+
+
 
