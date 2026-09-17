@@ -163,6 +163,7 @@ def get_available_recs(user_data):
     Returns:
         lists of movie dictionaries [{},{}]
     """
+    unwatched = get_friends_unique_watched(user_data)  #unwatched movies that at least one of the friends watched
 
     unwatched_list = get_friends_unique_watched(
         user_data
@@ -174,7 +175,7 @@ def get_available_recs(user_data):
         if movie["host"] in user_data["subscriptions"]:
             recommended_list.append(movie)
 
-    return recommended_list
+    return recommended
 
 
 # -----------------------------------------
@@ -187,14 +188,12 @@ def get_new_rec_by_genre(user_data):
     Only keep movies of the user's most watched genre
 
     Returns:
-        None if the friends' watched list is empty
         lists of movie dictionaries [{},{}]
     """
     unwatched_list = get_friends_unique_watched(
         user_data
     )  # unwatched movies that at least one of the friends watched
     genre = get_most_watched_genre(user_data)
-    # genre = "Fantasy" #for testing purposes
 
     recommended = []
     # filter out movies of all genres except the favorite genre
